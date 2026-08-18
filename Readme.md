@@ -198,7 +198,7 @@ server {
 }
 ```
 ```bash
-sudo systemctl status oauth2-proxy@monitoring
-sudo systemctl status nginx
+sudo systemctl restart oauth2-proxy@monitoring
+sudo systemctl reload nginx
 
 ```
