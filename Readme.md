@@ -140,5 +140,63 @@ realm setting > login > Email as username    et   Login with email    off
 ## nginx
 ```bash
 
+server {
+    listen 80;
+    server_name monitoring.domaine.fr;
+    return 301 https://$server_name$request_uri;
+}
 
+server {
+    listen 443 ssl http2;
+    server_name monitoring.domaine.fr;
+    ssl_certificate /etc/nginx/ssl/domaine.fr.cer;
+    ssl_certificate_key /etc/nginx/ssl/domaine.fr.key;
+
+    # Sous-requête d'auth, allégée
+    location = /oauth2/auth {
+        proxy_pass       http://127.0.0.1:4182;
+        proxy_set_header Host             $host;
+        proxy_set_header X-Real-IP        $remote_addr;
+        proxy_set_header X-Scheme         $scheme;
+        proxy_set_header Content-Length   "";
+        proxy_pass_request_body           off;
+    }
+
+    # Routes oauth2-proxy : sign_in, callback, sign_out...
+    location /oauth2/ {
+        proxy_pass       http://127.0.0.1:4182;
+        proxy_set_header Host                    $host;
+        proxy_set_header X-Real-IP               $remote_addr;
+        proxy_set_header X-Scheme                $scheme;
+        proxy_set_header X-Auth-Request-Redirect $request_uri;
+    }
+
+    # Appli monitoring, protégée
+    location / {
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in;
+
+        auth_request_set $user  $upstream_http_x_auth_request_user;
+        auth_request_set $email $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
+
+        proxy_pass http://localhost:8520;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+        root /usr/share/nginx/html;
+    }
+}
+```
+```bash
+sudo systemctl status oauth2-proxy@monitoring
 ```
