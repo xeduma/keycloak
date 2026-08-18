@@ -94,7 +94,9 @@ sudo systemctl status oauth2-proxy@kpi-motoculture
 journalctl -u oauth2-proxy@kpi-motoculture -f
 ```
 
-# config web
+# config web 
+## keycloak
+créer client > import
 
 ```json
 {
@@ -135,3 +137,8 @@ journalctl -u oauth2-proxy@kpi-motoculture -f
 désactiver la verification de mail
 realm setting > login > Email as username    et   Login with email    off
 
+## nginx
+```bash
+
+
+```
