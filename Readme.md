@@ -1,6 +1,3 @@
-désactiver la verificatino de mail
-realm setting > login > Email as username    et   Login with email    off
-
 # Installation
 ```bash
 cd /tmp
@@ -97,5 +94,8 @@ sudo systemctl status oauth2-proxy@kpi-motoculture
 journalctl -u oauth2-proxy@kpi-motoculture -f
 ```
 
+# config web
+désactiver la verification de mail
+realm setting > login > Email as username    et   Login with email    off
 
 
