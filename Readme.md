@@ -45,7 +45,7 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-# Configuration 
+# Configuration srv Oauth2
 ## configuration du realm
 ```bash
 sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
@@ -98,4 +98,39 @@ journalctl -u oauth2-proxy@kpi-motoculture -f
 désactiver la verification de mail
 realm setting > login > Email as username    et   Login with email    off
 
+```json
+{
+  "clientId": "kpi-motoculture-web",
+  "name": "KPI Motoculture Web",
+  "rootUrl": "https://kpi-motoculture.domaine.fr",
+  "baseUrl": "/",
+  "enabled": true,
+  "clientAuthenticatorType": "client-secret",
+  "secret": "CHANGE_MOI_GENERE_UN_SECRET",
+  "redirectUris": [
+    "https://kpi-motoculture.domaine.fr/oauth2/callback"
+  ],
+  "webOrigins": [
+    "https://kpi-motoculture.domaine.fr"
+  ],
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": false,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "publicClient": false,
+  "frontchannelLogout": true,
+  "protocol": "openid-connect",
+  "attributes": {
+    "post.logout.redirect.uris": "https://kpi-motoculture.domaine.fr/*",
+    "backchannel.logout.session.required": "true"
+  },
+  "fullScopeAllowed": true,
+  "defaultClientScopes": [
+    "web-origins",
+    "profile",
+    "roles",
+    "email"
+  ]
+}
 
+```
