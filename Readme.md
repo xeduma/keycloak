@@ -47,7 +47,9 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
-5. configuration du realm
+
+# Configuration 
+## configuration du realm
 ```bash
 sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
 ```
@@ -87,13 +89,13 @@ standard_logging = true
 request_logging = true
 auth_logging = true
 ```
-
-6. Activer chaque instance
+5. Activer chaque instance
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now oauth2-proxy@kpi-motoculture
 sudo systemctl status oauth2-proxy@kpi-motoculture
 journalctl -u oauth2-proxy@kpi-motoculture -f
 ```
+
 
 
