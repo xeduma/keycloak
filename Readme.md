@@ -95,8 +95,6 @@ journalctl -u oauth2-proxy@kpi-motoculture -f
 ```
 
 # config web
-désactiver la verification de mail
-realm setting > login > Email as username    et   Login with email    off
 
 ```json
 {
@@ -134,3 +132,6 @@ realm setting > login > Email as username    et   Login with email    off
 }
 
 ```
+désactiver la verification de mail
+realm setting > login > Email as username    et   Login with email    off
+
