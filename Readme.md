@@ -16,12 +16,13 @@ sudo useradd --system --no-create-home --shell /usr/sbin/nologin oauth2-proxy
 sudo mkdir -p /etc/oauth2-proxy
 sudo chown root:oauth2-proxy /etc/oauth2-proxy
 sudo chmod 750 /etc/oauth2-proxy
+sudo usermod -aG www-data oauth2-proxy
 ```
 3. Générer le cookie secret
 ```bash
 openssl rand -base64 32 | tr -- '+/' '-_'
 ```
-5. Service systemd
+4. Service systemd
 ```bash
 sudo nano /etc/systemd/system/oauth2-proxy@.service
 ```
@@ -46,12 +47,53 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
+5. configuration du realm
 ```bash
 sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
 ```
-6. Activer et démarrer
+```bash
+
+provider = "keycloak-oidc"
+oidc_issuer_url = "https://login.ddvs.fr/realms/kpi-test"
+
+client_id = "kpi-motoculture"
+
+#copie colle le client > credential > client secret
+client_secret = "CmGtN4j38ZjALcDinBeDqSnTVm77qVNG"
+
+redirect_url = "https://kpi-motoculture.ddvs.fr/oauth2/callback"
+
+# copie le token generer avec :
+# openssl rand -base64 32 | tr -- '+/' '-_'
+cookie_secret = "H65QZbomFfeCiK-gSMa3aFnovvIM2H1_nCkC-23f9uw="
+cookie_secure = true
+cookie_expire = "168h"
+cookie_samesite = "lax"
+
+email_domains = ["*"]
+
+#serveur web en reverse proxy
+#upstreams = ["http://127.0.0.1:8080/"]
+
+#serveur web classic /var/www/html
+upstreams = ["static://202"]
+
+
+#srv oauth2
+http_address = "127.0.0.1:4180"
+
+scope = "openid profile email"
+standard_logging = true
+request_logging = true
+auth_logging = true
+```
+
+6. Activer chaque instance
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now oauth2-proxy
-sudo systemctl status oauth2-proxy
+sudo systemctl enable --now oauth2-proxy@kpi-motoculture
+sudo systemctl status oauth2-proxy@kpi-motoculture
+journalctl -u oauth2-proxy@kpi-motoculture -f
 ```
+
+
