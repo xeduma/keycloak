@@ -53,14 +53,14 @@ sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
 ```bash
 
 provider = "keycloak-oidc"
-oidc_issuer_url = "https://login.ddvs.fr/realms/kpi-test"
+oidc_issuer_url = "https://login.domaine.fr/realms/kpi-test"
 
 client_id = "kpi-motoculture"
 
 #copie colle le client > credential > client secret
 client_secret = "CmGtN4j38ZjALcDinBeDqSnTVm77qVNG"
 
-redirect_url = "https://kpi-motoculture.ddvs.fr/oauth2/callback"
+redirect_url = "https://kpi-motoculture.domaine.fr/oauth2/callback"
 
 # copie le token generer avec :
 # openssl rand -base64 32 | tr -- '+/' '-_'
