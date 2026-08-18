@@ -21,26 +21,23 @@ sudo chmod 750 /etc/oauth2-proxy
 ```bash
 openssl rand -base64 32 | tr -- '+/' '-_'
 ```
-
-sudo nano /etc/oauth2-proxy/oauth2-proxy.cfg
-
-
-
-sudo nano /etc/systemd/system/oauth2-proxy.service
+5. Service systemd
+```bash
+sudo nano /etc/systemd/system/oauth2-proxy@.service
+```
 ```bash
 [Unit]
-Description=OAuth2 Proxy - kpi-motoculture
+Description=OAuth2 Proxy - %i
 After=network.target
 
 [Service]
 Type=simple
 User=oauth2-proxy
 Group=oauth2-proxy
-ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/oauth2-proxy.cfg
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/%i.cfg
 Restart=on-failure
 RestartSec=5
 
-# Durcissement
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
@@ -48,6 +45,9 @@ PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
+```
+```bash
+sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
 ```
 6. Activer et démarrer
 ```bash
