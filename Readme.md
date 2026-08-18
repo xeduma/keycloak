@@ -199,4 +199,6 @@ server {
 ```
 ```bash
 sudo systemctl status oauth2-proxy@monitoring
+sudo systemctl status nginx
+
 ```
