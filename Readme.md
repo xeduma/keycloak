@@ -242,25 +242,25 @@ créer client > import
 
 ```
 désactiver la verification de mail
-realm setting > login > Email as username    et   Login with email    off
+``` realm setting > login > Email as username    et   Login with email    off```
 
 authorization role, droits application
-client > setting > Capability config - Authorization -> ON
+```client > setting > Capability config - Authorization -> ON```
 
 ROLE
-client > role > create role > monitoring_Read 
+```client > role > create role > monitoring_Read ```
 
 GROUP entreprises
-groups > create > entreprise1 
-groups > create > entreprise1 > monitoring_read
+```groups > create > entreprise1 ```
+```groups > create > entreprise1 > monitoring_read```
 
 USER
 créer les droits d'applications
-client > Authorization > Scope > Read / Write / Admin ...
-client > Authorization > Ressouces > monitoring-Read > Read
-client > Authorization > Policy > Role > Read policy > monitoring-read-policy > Assign role > client role > Read
-client > Authorization > Permission > scope based > read authorisation > read policy
+```client > Authorization > Scope > Read / Write / Admin ...```
+```client > Authorization > Ressouces > monitoring-Read > Read```
+```client > Authorization > Policy > Role > Read policy > monitoring-read-policy > Assign role > client role > Read```
+```client > Authorization > Permission > scope based > read authorisation > read policy```
 
 USERS assign group role application
-groups > entreprise1 > monitoring-read > role mapping > client  role > monitoring_Read
+```groups > entreprise1 > monitoring-read > role mapping > client  role > monitoring_Read```
 
