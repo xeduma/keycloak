@@ -28,7 +28,7 @@ sudo nano /etc/oauth2-proxy/oauth2-proxy.cfg
 provider = "keycloak-oidc"
 oidc_issuer_url = "https://login.domaine.fr/realms/kpi-test"
 
-client_id = "ddvs-software"
+client_id = "domaine-software"
 client_secret = "LE_SECRET_DU_CLIENT"
 
 # Pas de redirect_url fixe : auto-déduit du Host de la requête entrante
@@ -122,7 +122,7 @@ Template par site
 ```bash
 server {
     listen 80;
-    server_name NOM-DU-SITE.ddvs.fr;
+    server_name NOM-DU-SITE.domaine.fr;
     return 301 https://$server_name$request_uri;
 }
 
