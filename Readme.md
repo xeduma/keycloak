@@ -1,4 +1,4 @@
-# Installation
+# Installation Oauth2.0 sur serveur
 ```bash
 cd /tmp
 wget https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v7.15.3/oauth2-proxy-v7.15.3.linux-amd64.tar.gz
@@ -15,24 +15,67 @@ sudo chown root:oauth2-proxy /etc/oauth2-proxy
 sudo chmod 750 /etc/oauth2-proxy
 sudo usermod -aG www-data oauth2-proxy
 ```
-3. Générer le cookie secret
+# pour un seul   *.DOMAINE.fr
+Générer le cookie secret
 ```bash
 openssl rand -base64 32 | tr -- '+/' '-_'
 ```
-4. Service systemd
+
 ```bash
-sudo nano /etc/systemd/system/oauth2-proxy@.service
+sudo nano /etc/oauth2-proxy/oauth2-proxy.cfg
 ```
 ```bash
+provider = "keycloak-oidc"
+oidc_issuer_url = "https://login.domaine.fr/realms/kpi-test"
+
+client_id = "ddvs-software"
+client_secret = "LE_SECRET_DU_CLIENT"
+
+# Pas de redirect_url fixe : auto-déduit du Host de la requête entrante
+
+cookie_secret = "LE_SECRET_GENERE"
+cookie_domains = [".domaine.fr"]
+whitelist_domains = [".domaine.fr"]
+cookie_secure = true
+cookie_httponly = true
+cookie_expire = "168h"
+cookie_refresh = "60m"
+cookie_samesite = "lax"
+
+email_domains = ["*"]
+upstreams = ["static://202"]
+http_address = "127.0.0.1:4180"
+
+scope = "openid profile email"
+
+# Passage des identités vers l'app en headers
+pass_access_token = true
+pass_authorization_header = true
+set_xauthrequest = true
+
+standard_logging = true
+request_logging = true
+auth_logging = true
+```
+```bash
+sudo chown root:oauth2-proxy /etc/oauth2-proxy/oauth2-proxy.cfg
+sudo chmod 640 /etc/oauth2-proxy/oauth2-proxy.cfg
+```
+Service systemd unique
+```bash
+sudo nano /etc/systemd/system/oauth2-proxy.service
+```
+
+```bash
 [Unit]
-Description=OAuth2 Proxy - %i
+Description=OAuth2 Proxy - shared
 After=network.target
 
 [Service]
 Type=simple
 User=oauth2-proxy
 Group=oauth2-proxy
-ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/%i.cfg
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/oauth2-proxy.cfg
 Restart=on-failure
 RestartSec=5
 
@@ -44,8 +87,82 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 ```
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now oauth2-proxy
+sudo systemctl status oauth2-proxy --no-pager
+curl -I http://127.0.0.1:4180/oauth2/auth   # doit renvoyer 401
+```
 
-# Configuration srv Oauth2
+nginx — snippet réutilisable
+```bash
+sudo nano /etc/nginx/snippets/oauth2-proxy.conf
+```
+```bash
+location = /oauth2/auth {
+    proxy_pass       http://127.0.0.1:4180;
+    proxy_set_header Host             $host;
+    proxy_set_header X-Real-IP        $remote_addr;
+    proxy_set_header X-Scheme         $scheme;
+    proxy_set_header Content-Length   "";
+    proxy_pass_request_body           off;
+}
+
+location /oauth2/ {
+    proxy_pass       http://127.0.0.1:4180;
+    proxy_set_header Host                    $host;
+    proxy_set_header X-Real-IP               $remote_addr;
+    proxy_set_header X-Scheme                $scheme;
+    proxy_set_header X-Auth-Request-Redirect $request_uri;
+}
+```
+
+Template par site
+
+```bash
+server {
+    listen 80;
+    server_name NOM-DU-SITE.ddvs.fr;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name NOM-DU-SITE.domaine.fr;
+    ssl_certificate /etc/nginx/ssl/domaine.fr.cer;
+    ssl_certificate_key /etc/nginx/ssl/domaine.fr.key;
+
+    include /etc/nginx/snippets/oauth2-proxy.conf;
+
+    location / {
+        auth_request /oauth2/auth;
+        error_page 401 = /oauth2/sign_in;
+
+        auth_request_set $user  $upstream_http_x_auth_request_user;
+        auth_request_set $email $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
+
+        # ADAPTER selon le site :
+        # proxy_pass http://localhost:PORT;   ← backend applicatif
+        # ou : root /var/www/html/...; try_files $uri /index.html;  ← statique
+    }
+}
+```
+
+
+
+# plusieurs domaine.fr 
+```bash
+sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
+```
+```bash
+
+```
+Activer l'instance
+```bash
+
+```
 ## configuration du realm
 ```bash
 sudo nano /etc/oauth2-proxy/kpi-motoculture.cfg
