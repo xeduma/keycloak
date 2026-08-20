@@ -248,8 +248,8 @@ realm setting > login > Email as username    et   Login with email    off
 
 authorization role, droits application
 ```
-```client > setting > Capability config - Authorization -> ON
-
+client > setting > Capability config - Authorization -> ON
+```
 ROLE
 ```
 client > role > create role > monitoring_Read 
