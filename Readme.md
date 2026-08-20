@@ -224,14 +224,14 @@ créer client > import
   "directAccessGrantsEnabled": false,
   "serviceAccountsEnabled": false,
   "redirectUris": [
-    "https://kpi-motoculture.ddvs.fr/oauth2/callback",
-    "https://monitoring.ddvs.fr/oauth2/callback",
-    "https://kpi-jardinage.ddvs.fr/oauth2/callback"
+    "https://kpi-motoculture.domaine.fr/oauth2/callback",
+    "https://monitoring.domaine.fr/oauth2/callback",
+    "https://kpi-jardinage.domaine.fr/oauth2/callback"
   ],
   "webOrigins": [
-    "https://kpi-motoculture.ddvs.fr",
-    "https://monitoring.ddvs.fr",
-    "https://kpi-jardinage.ddvs.fr"
+    "https://kpi-motoculture.domaine.fr",
+    "https://monitoring.domaine.fr",
+    "https://kpi-jardinage.domaine.fr"
   ],
   "attributes": {
     "post.logout.redirect.uris": "https://*.domaine.fr/*",
