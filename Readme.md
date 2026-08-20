@@ -217,105 +217,50 @@ créer client > import
 
 ```json
 {
-  "clientId": "kpi-motoculture-web",
-  "name": "KPI Motoculture Web",
-  "rootUrl": "https://kpi-motoculture.domaine.fr",
-  "baseUrl": "/",
-  "enabled": true,
-  "clientAuthenticatorType": "client-secret",
-  "secret": "CHANGE_MOI_GENERE_UN_SECRET",
-  "redirectUris": [
-    "https://kpi-motoculture.domaine.fr/oauth2/callback"
-  ],
-  "webOrigins": [
-    "https://kpi-motoculture.domaine.fr"
-  ],
+  "clientId": "sites-multi",
+  "protocol": "openid-connect",
+  "publicClient": false,
   "standardFlowEnabled": true,
-  "implicitFlowEnabled": false,
   "directAccessGrantsEnabled": false,
   "serviceAccountsEnabled": false,
-  "publicClient": false,
-  "frontchannelLogout": true,
-  "protocol": "openid-connect",
+  "redirectUris": [
+    "https://kpi-motoculture.ddvs.fr/oauth2/callback",
+    "https://monitoring.ddvs.fr/oauth2/callback",
+    "https://kpi-jardinage.ddvs.fr/oauth2/callback"
+  ],
+  "webOrigins": [
+    "https://kpi-motoculture.ddvs.fr",
+    "https://monitoring.ddvs.fr",
+    "https://kpi-jardinage.ddvs.fr"
+  ],
   "attributes": {
-    "post.logout.redirect.uris": "https://kpi-motoculture.domaine.fr/*",
+    "post.logout.redirect.uris": "https://*.domaine.fr/*",
     "backchannel.logout.session.required": "true"
   },
-  "fullScopeAllowed": true,
-  "defaultClientScopes": [
-    "web-origins",
-    "profile",
-    "roles",
-    "email"
-  ]
+  "defaultClientScopes": ["web-origins", "profile", "roles", "email"]
 }
 
 ```
 désactiver la verification de mail
 realm setting > login > Email as username    et   Login with email    off
 
-## nginx
-```bash
+authorization role, droits application
+client > setting > Capability config - Authorization -> ON
 
-server {
-    listen 80;
-    server_name monitoring.domaine.fr;
-    return 301 https://$server_name$request_uri;
-}
+ROLE
+client > role > create role > monitoring_Read 
 
-server {
-    listen 443 ssl http2;
-    server_name monitoring.domaine.fr;
-    ssl_certificate /etc/nginx/ssl/domaine.fr.cer;
-    ssl_certificate_key /etc/nginx/ssl/domaine.fr.key;
+GROUP entreprises
+groups > create > entreprise1 
+groups > create > entreprise1 > monitoring_read
 
-    # Sous-requête d'auth, allégée
-    location = /oauth2/auth {
-        proxy_pass       http://127.0.0.1:4182;
-        proxy_set_header Host             $host;
-        proxy_set_header X-Real-IP        $remote_addr;
-        proxy_set_header X-Scheme         $scheme;
-        proxy_set_header Content-Length   "";
-        proxy_pass_request_body           off;
-    }
+USER
+créer les droits d'applications
+client > Authorization > Scope > Read / Write / Admin ...
+client > Authorization > Ressouces > monitoring-Read > Read
+client > Authorization > Policy > Role > Read policy > monitoring-read-policy > Assign role > client role > Read
+client > Authorization > Permission > scope based > read authorisation > read policy
 
-    # Routes oauth2-proxy : sign_in, callback, sign_out...
-    location /oauth2/ {
-        proxy_pass       http://127.0.0.1:4182;
-        proxy_set_header Host                    $host;
-        proxy_set_header X-Real-IP               $remote_addr;
-        proxy_set_header X-Scheme                $scheme;
-        proxy_set_header X-Auth-Request-Redirect $request_uri;
-    }
+USERS assign group role application
+groups > entreprise1 > monitoring-read > role mapping > client  role > monitoring_Read
 
-    # Appli monitoring, protégée
-    location / {
-        auth_request /oauth2/auth;
-        error_page 401 = /oauth2/sign_in;
-
-        auth_request_set $user  $upstream_http_x_auth_request_user;
-        auth_request_set $email $upstream_http_x_auth_request_email;
-        proxy_set_header X-User  $user;
-        proxy_set_header X-Email $email;
-
-        proxy_pass http://localhost:8520;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
-    }
-}
-```
-```bash
-sudo systemctl restart oauth2-proxy@monitoring
-sudo systemctl reload nginx
-
-```
